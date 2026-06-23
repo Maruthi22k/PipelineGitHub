@@ -1,12 +1,10 @@
 name: Print GitHub Variables
 
-on:
-  push:
-    branches:
-      - main:
+on:[push, workflow_dispatch]
+      
 
 jobs:
-  print-vars:
+  print-variables:
     runs-on: ubuntu-latest
 
     steps:
