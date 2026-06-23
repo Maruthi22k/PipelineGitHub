@@ -1,0 +1,22 @@
+name: inputs takes from user and print for testing
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "Enter your name"
+        required: true
+        type: string
+      age:
+        description: "Enter your age"
+        required: true
+        type: number
+jobs:
+  test-inputs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print Inputs
+        run: |
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Version: ${{ github.event.inputs.version }}"
