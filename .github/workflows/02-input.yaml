@@ -1,0 +1,30 @@
+name: Test File Input
+
+on:
+  workflow_dispatch:
+    inputs:
+      file_path:
+        description: "Path to the file to test"
+        required: true
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show input
+        run: |
+          echo "File path: ${{ inputs.file_path }}"
+
+      - name: Check if file exists
+        run: |
+          if [ -f "${{ inputs.file_path }}" ]; then
+            echo "File exists"
+            cat "${{ inputs.file_path }}"
+          else
+            echo "File does not exist"
+            exit 1
+          fi
