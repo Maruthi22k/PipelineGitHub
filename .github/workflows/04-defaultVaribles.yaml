@@ -1,7 +1,6 @@
 name: Print GitHub Variables
 
-on:[push, workflow_dispatch]
-      
+on: [push, workflow_dispatch]
 
 jobs:
   print-variables:
