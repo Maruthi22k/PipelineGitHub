@@ -13,12 +13,12 @@ jobs:
             echo "This is not a push event."
           fi
         
-        name : trigger PROD environment
+      - name : trigger PROD environment
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           echo "Triggering PROD environment..."
         
-        name : trigger dev environment
+      - name : trigger dev environment
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: |
           echo "Triggering dev environment..."
