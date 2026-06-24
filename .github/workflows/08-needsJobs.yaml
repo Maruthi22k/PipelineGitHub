@@ -20,6 +20,7 @@ jobs:
         run: echo "This is job 2, step 2."
 
   job3:
+    needs: job4
     runs-on: ubuntu-latest
     steps:
       - name: Step 1
