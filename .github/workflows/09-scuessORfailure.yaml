@@ -1,0 +1,29 @@
+name: sucess or failure jobs
+
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Main Step
+        run: exit 1
+
+      - name: Success Step
+        if: ${{ success() }}
+        run: echo "Workflow succeeded"
+
+      - name: Failure Step
+        if: ${{ failure() }}
+        run: echo "Workflow failed"
+
+      - name: Cancelled Step
+        if: ${{ cancelled() }}
+        run: echo "Workflow was cancelled"
+
+      - name: Always Step
+        if: ${{ always() }}
+        run: echo "Always runs"
