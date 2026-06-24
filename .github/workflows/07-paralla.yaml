@@ -9,8 +9,7 @@ jobs:
         run: echo "This is job 1, step 1."
       - name: Step 2
         run: echo "This is job 1, step 2."
-      - name: Step 3
-        run: echo "This is job 1, step 3."
+
   job2:
 
     runs-on: ubuntu-latest
@@ -19,8 +18,7 @@ jobs:
         run: echo "This is job 2, step 1."
       - name: Step 2
         run: echo "This is job 2, step 2."
-      - name: Step 3
-        run: echo "This is job 2, step 3."
+
   job3:
     runs-on: ubuntu-latest
     steps:
@@ -28,5 +26,13 @@ jobs:
         run: echo "This is job 3, step 1."
       - name: Step 2
         run: echo "This is job 3, step 2."
-      - name: Step 3
-        run: echo "This is job 3, step 3."
+        
+  job4:
+  needs: [job1,job2]  ### job4 will run after job1 and job2 are completed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Step 1
+        run: echo "This is job 4, step 1."
+      - name: Step 2
+        run: echo "This is job 4, step 2."
+    
