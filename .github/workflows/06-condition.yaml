@@ -12,7 +12,7 @@ jobs:
           else
             echo "This is not a push event."
           fi
-        
+        ## PROD will faild because of the condition, but dev will pass because of the condition
       - name : trigger PROD environment
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
