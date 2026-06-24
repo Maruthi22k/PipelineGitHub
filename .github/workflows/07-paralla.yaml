@@ -28,7 +28,7 @@ jobs:
         run: echo "This is job 3, step 2."
         
   job4:
-  needs: [job1,job2]  ### job4 will run after job1 and job2 are completed
+    needs: [job1,job2]  ### job4 will run after job1 and job2 are completed
     runs-on: ubuntu-latest
     steps:
       - name: Step 1
