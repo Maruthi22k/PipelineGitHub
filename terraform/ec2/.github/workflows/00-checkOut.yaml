@@ -1,0 +1,46 @@
+name: checkOut code
+
+on: [push]
+
+jobs:
+  checkOut:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name : list files
+        run: ls -la
+
+      # - name: terraform install
+      #   run: |
+      #     curl -LO https://releases.hashicorp.com/terraform/1.6.5/terraform_1.6.5_linux_amd64.zip
+      #     unzip terraform_1.6.5_linux_amd64.zip
+      #     sudo mv terraform /usr/local/bin/
+      #     terraform -v
+
+
+## if we are not given with the terraform _varion ,terraform will install the latest version default terraform 
+      - name: terraform install
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.5  ### these are the steps to install terraform using hashicorp/setup-terraform@v2 action
+
+      - name: Aws configure
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRECT_ACCESS_KEY_ID }}
+          aws-region: us-east-1
+
+      - name: terraform init
+        run: terraform init
+
+      - name: terraform plan
+        run: terraform plan 
+      
+      - name: terraform approve
+        run: terraform apply -auto-approve
+
+      # - name: terraform destroy
+      #   run: terraform destroy -auto-approve   
