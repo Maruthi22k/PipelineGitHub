@@ -1,0 +1,95 @@
+name: CI Pipeline
+ 
+on:
+  push:
+    branches:
+      - develop
+      - release
+      # "thworkflow_dispatch" is used to grigger to manually trigger the workflow from github;
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target deployment environment'
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - main
+ 
+env:
+  PROJECT: ${{ vars.PROJECT_ID }}
+  NODE_VERSION: ${{ vars.NODE_VERSION }}
+  NPM_VERSION: ${{ vars.NPM_VERSION }}
+  METADATA_FILE: ${{ vars.METADATA_FILE }}
+ 
+jobs:
+  secrets-scan:
+    name: Build, Test, Sonar and Nexus
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+ 
+      - name: Git-Secrets Scan
+        uses: ikano-actions/git-secrets@v1
+ 
+      - name: Set Deployment Environment
+        id: set-env
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref_name }}" = "develop" ]; then
+            echo "environment=dev" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref_name }}" = "release" ]; then
+            echo "environment=main" >> $GITHUB_OUTPUT
+          else
+            echo "environment=skip" >> $GITHUB_OUTPUT
+          fi
+ 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+  
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+ 
+      - name: Build the Project
+        run: |
+          ./gradlew build jacocoTestReport \
+            -Pdeployment_env=${{ steps.set-env.outputs.environment }} \
+            --refresh-dependencies \
+            -PnexusUsername="${{ secrets.IBGP_NEXUS_READ_USER }}" \
+            -PnexusPassword="${{ secrets.IBGP_NEXUS_READ_PASSWORD }}"
+ 
+      - name: Run OWASP Dependency Check
+        uses: ikano-actions/dependency-check@v13
+        with:
+          ossindex-username: ${{ secrets.OSSINDEX_USERNAME }}
+          ossindex-token: ${{ secrets.OSSINDEX_TOKEN }}
+ 
+      - name: SonarQube Scan
+        id: sonar-scan
+        uses: sonarsource/sonarqube-scan-action@v5
+        env:
+          SONAR_HOST_URL: ${{ vars.IBGP_SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.IBGP_SONAR_TOKEN }}
+ 
+      - name: Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@v1.2.0
+        timeout-minutes: 5
+        env:
+          SONAR_HOST_URL: ${{ vars.IBGP_SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.IBGP_SONAR_TOKEN }}
+ 
+      - name: Publish Artifact to Nexus
+        run: |
+          ./gradlew publish --info \
+            -PnexusUsername="${{ secrets.IBGP_NEXUS_WRITE_USER }}" \
+            -PnexusPassword="${{ secrets.IBGP_NEXUS_WRITE_PASSWORD }}" \
+            2>&1 | tee errorlogs
+ 
+ 
